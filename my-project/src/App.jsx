@@ -1,35 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import EmployeeCard from "./components/EmployeeCard";
+import SearchBar from "./components/SearchBar";
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [employees, setEmployees] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+
+    const fetchEmployees = async () => {
+
+      try {
+
+        const response = await fetch(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch employees");
+        }
+
+        const data = await response.json();
+        setEmployees(data);
+        setLoading(false);
+
+      } catch (err) {
+
+        setError(err.message);
+        setLoading(false);
+
+      }
+
+    };
+
+    fetchEmployees();
+
+  }, []);
+
+  const filteredEmployees = employees.filter((employee) =>
+    employee.name.toLowerCase().includes(search.toLowerCase()) ||
+    employee.email.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (loading) {
+    return <h2 className="text-center mt-10">Loading employees...</h2>;
+  }
+
+  if (error) {
+    return <h2 className="text-center text-red-500">{error}</h2>;
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="min-h-screen bg-gray-100 p-6">
+
+      <h1 className="text-3xl font-bold text-center mb-6">
+        Employee Directory
+      </h1>
+
+      <SearchBar search={search} setSearch={setSearch} />
+
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+
+        {filteredEmployees.map((employee) => (
+          <EmployeeCard key={employee.id} employee={employee} />
+        ))}
+
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+
+    </div>
+  );
 }
 
-export default App
+export default App;
