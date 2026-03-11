@@ -1,43 +1,28 @@
 import { useEffect, useState } from "react";
 import EmployeeCard from "./components/EmployeeCard";
-import SearchBar from "./components/SearchBar";
 
 function App() {
-
   const [employees, setEmployees] = useState([]);
-  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-
-    const fetchEmployees = async () => {
-
-      try {
-
-        const response = await fetch(
-          "https://jsonplaceholder.typicode.com/users"
-        );
-
-        if (!response.ok) {
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((res) => {
+        if (!res.ok) {
           throw new Error("Failed to fetch employees");
         }
-
-        const data = await response.json();
+        return res.json();
+      })
+      .then((data) => {
         setEmployees(data);
         setLoading(false);
-
-      } catch (err) {
-
+      })
+      .catch((err) => {
         setError(err.message);
         setLoading(false);
-
-      }
-
-    };
-
-    fetchEmployees();
-
+      });
   }, []);
 
   const filteredEmployees = employees.filter((employee) =>
@@ -46,30 +31,30 @@ function App() {
   );
 
   if (loading) {
-    return <h2 className="text-center mt-10">Loading employees...</h2>;
+    return <h2 style={{ textAlign: "center" }}>Loading employees...</h2>;
   }
 
   if (error) {
-    return <h2 className="text-center text-red-500">{error}</h2>;
+    return <h2 style={{ textAlign: "center" }}>Error: {error}</h2>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="container">
+      <h1>Employee Directory</h1>
 
-      <h1 className="text-3xl font-bold text-center mb-6">
-        Employee Directory
-      </h1>
+      <input
+        type="text"
+        placeholder="Search by name or email..."
+        className="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-      <SearchBar search={search} setSearch={setSearch} />
-
-      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-
+      <div className="grid">
         {filteredEmployees.map((employee) => (
           <EmployeeCard key={employee.id} employee={employee} />
         ))}
-
       </div>
-
     </div>
   );
 }

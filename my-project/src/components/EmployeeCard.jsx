@@ -1,94 +1,43 @@
-import { useRef } from "react";
+import html2canvas from "html2canvas";
 
-
-const EmployeeCard = ({ employee }) => {
-
+function EmployeeCard({ employee }) {
   const { id, name, email, phone, website, company } = employee;
 
-  const cardRef = useRef();
+  const downloadCard = () => {
+    const card = document.getElementById(`card-${id}`);
 
-  const profileImage = `https://randomuser.me/api/portraits/men/${id}.jpg`;
+    html2canvas(card).then((canvas) => {
+      const link = document.createElement("a");
+      link.download = `${name}-employee-card.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  };
 
-  const downloadCard = async () => {
-    const canvas = await html2canvas(cardRef.current);
-    const link = document.createElement("a");
-    link.download = `${name}-card.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+  const printCard = () => {
+    const card = document.getElementById(`card-${id}`).innerHTML;
+    const win = window.open("", "", "width=800,height=600");
+    win.document.write(card);
+    win.document.close();
+    win.print();
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-      
-      <div
-        ref={cardRef}
-        className="w-80 bg-white rounded-2xl shadow-xl p-6 text-center border border-gray-100 hover:scale-105 transition duration-300"
-      >
+    <div className="card" id={`card-${id}`}>
+      <h3>{name}</h3>
 
-        {/* Profile Image */}
-        <div className="flex justify-center mb-4">
-          <img
-            src={profileImage}
-            alt={name}
-            className="w-24 h-24 rounded-full object-cover border-4 border-blue-500 shadow-md"
-          />
-        </div>
+      <p><strong>ID:</strong> {id}</p>
+      <p><strong>Email:</strong> {email}</p>
+      <p><strong>Phone:</strong> {phone}</p>
+      <p><strong>Website:</strong> {website}</p>
+      <p><strong>Company:</strong> {company.name}</p>
 
-        {/* Name */}
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          {name}
-        </h2>
-
-        {/* Employee Details */}
-        <div className="text-gray-600 text-sm space-y-2 text-left">
-          <p className="flex justify-between">
-            <span className="font-semibold">ID:</span>
-            <span>{id}</span>
-          </p>
-
-          <p className="flex justify-between">
-            <span className="font-semibold">Email:</span>
-            <span className="truncate">{email}</span>
-          </p>
-
-          <p className="flex justify-between">
-            <span className="font-semibold">Phone:</span>
-            <span>{phone}</span>
-          </p>
-
-          <p className="flex justify-between">
-            <span className="font-semibold">Website:</span>
-            <span className="text-blue-500">{website}</span>
-          </p>
-
-          <p className="flex justify-between">
-            <span className="font-semibold">Company:</span>
-            <span>{company?.name}</span>
-          </p>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex justify-center gap-4 mt-6">
-          <button
-            onClick={() => window.print()}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
-          >
-            Print
-          </button>
-
-          <button
-            onClick={downloadCard}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition"
-          >
-            
-            Download
-          </button>
-        </div>
-
+      <div className="buttons">
+        <button onClick={downloadCard}>Download</button>
+        <button onClick={printCard}>Print</button>
       </div>
-
     </div>
   );
-};
+}
 
 export default EmployeeCard;
